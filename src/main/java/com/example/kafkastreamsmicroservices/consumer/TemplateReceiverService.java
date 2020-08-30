@@ -10,13 +10,15 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ReceiverTemplate {
+public class TemplateReceiverService extends ReceiverService {
+
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private static final String TEMPLATE_CONTAINER_FACTORY = "templateKafkaListenerContainerFactory";
 
     @KafkaListener(
             topics = KafkaConfig.TEMPLATE_TOPIC,
             groupId = TemplateReceiverConfig.TEMPLATE_GROUP_ID,
-            containerFactory = "templateKafkaListenerContainerFactory"
+            containerFactory = TEMPLATE_CONTAINER_FACTORY
     )
     public void process(ConsumerRecord record, Acknowledgment ack) {
         boolean uncommitOffset = true;
@@ -33,13 +35,5 @@ public class ReceiverTemplate {
 
         LOG.info("No exceptions, committing offsets.");
         ack.acknowledge();
-    }
-
-    private void handle(ConsumerRecord consumerRecord) {
-        LOG.info(String.format("{key: value} -> {%s: %s}", consumerRecord.key(), consumerRecord.value()));
-        LOG.info("Headers    -> {}", consumerRecord.headers());
-        LOG.info("Partition  -> {}", consumerRecord.partition());
-        LOG.info("Offset  -> {}", consumerRecord.offset());
-
     }
 }
